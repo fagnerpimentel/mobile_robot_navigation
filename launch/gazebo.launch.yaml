@@ -1,0 +1,12 @@
+launch:
+
+- arg:
+    name: "world"
+    default: "r2d2"
+
+- executable:
+    cmd: "gazebo --verbose $(find-pkg-share mobile_robot_navigation)/resource/worlds/$(var world).world"
+    env:
+        - name: GAZEBO_MODEL_PATH
+          value: "$(find-pkg-share mobile_robot_navigation)/resource/models"
+

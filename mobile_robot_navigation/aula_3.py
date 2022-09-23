@@ -1,4 +1,4 @@
-# Aula 1: Movimentação básico.
+# Aula 3: Desvio de obstáculos. 
 # 
 # Utilize os comandos a seguir para imprimir mensagens no sistema de log do ROS:
 #     self.get_logger().debug ('Exemplo de mensagem de debug.')
@@ -7,7 +7,7 @@
 #     self.get_logger().error ('Exemplo de mensagem de erro comum.')
 #     self.get_logger().fatal ('Exemplo de mensagem de erro fatal.')
 #
-# Utilize o comando a seguir para fazer o robô esperar para receber o próximo comando.
+# Utilize o comando 'wait' para fazer o robô esperar para receber o próximo comando.
 # s é uma variável numérica que representa a quantidade de seguntos que o robô deve esperar até receber o próximo comando.
 #     self.wait(s) 
 #
@@ -34,6 +34,7 @@
 #                 self.pose.orientation.z,
 #                 self.pose.orientation.w]) 
 
+
 from .robot import R2D2
 
 import rclpy
@@ -49,41 +50,59 @@ class RobotControl(R2D2):
     # Essa função é chamada apenas uma vez quando o seu nó é executado.
     # Modifique essafunção para inicializar a variáveis que você vai precisar para controlar o seu robô. 
     def navigation_start(self):
-        self.get_logger().info('Inicializando o nó.')
-
         self.ir_para_frente = Twist(linear=Vector3(x= 1.0,y=0.0,z=0.0),angular=Vector3(x=0.0,y=0.0,z= 0.0))
         self.ir_para_tras   = Twist(linear=Vector3(x=-1.0,y=0.0,z=0.0),angular=Vector3(x=0.0,y=0.0,z= 0.0))
         self.girar_direita  = Twist(linear=Vector3(x= 0.0,y=0.0,z=0.0),angular=Vector3(x=0.0,y=0.0,z=-0.5))
         self.girar_esquerda = Twist(linear=Vector3(x= 0.0,y=0.0,z=0.0),angular=Vector3(x=0.0,y=0.0,z= 0.5))
         self.parar          = Twist(linear=Vector3(x= 0.0,y=0.0,z=0.0),angular=Vector3(x=0.0,y=0.0,z= 0.0))
 
+        self.curva_direita  = Twist(linear=Vector3(x= 0.5,y=0.0,z=0.0),angular=Vector3(x=0.0,y=0.0,z=-0.5))
+        self.curva_esquerda = Twist(linear=Vector3(x= 0.0,y=0.0,z=0.0),angular=Vector3(x=0.0,y=0.0,z= 0.5))
+
+        self.objetivo_x = 19
+        self.objetivo_y = 19
+
 
     # Essa função é chamada a cada passo de execução do seu nó.
     # Modifiqe essa função para executar a programação de controle do seu robô
     def navigation_update(self):
-        self.get_logger().info('Ir para frente por 5 segundos.')            
-        self.pub_cmd_vel.publish(self.ir_para_frente)
-        self.wait(5)
+        # laser = self.get_laser()
 
-        self.get_logger().info('Ir para tras por 5 segundos.')            
-        self.pub_cmd_vel.publish(self.ir_para_tras)
-        self.wait(5)
+        distancia_direita           = min((self.laser[  0: 80])) # -90 a -10 graus 
+        distancia_frente            = min((self.laser[ 80:100])) # -10 a  10 graus
+        distancia_esquerda          = min((self.laser[100:180])) #  10 a  90 graus 
 
-        self.get_logger().info('Girar para direita por 5 segundos.')
-        self.pub_cmd_vel.publish(self.girar_direita)
-        self.wait(5)
+        _, _, robo_angulo = tf_transformations.euler_from_quaternion(
+            [self.pose.orientation.x,
+            self.pose.orientation.y,
+            self.pose.orientation.z,
+            self.pose.orientation.w])        
+        objetivo_angulo = math.atan2(self.objetivo_x,self.objetivo_y)
 
-        self.get_logger().info('Girar para esquerda por 5 segundos.')
-        self.pub_cmd_vel.publish(self.girar_esquerda)
-        self.wait(5)
+        diferenca = objetivo_angulo - robo_angulo
+        # self.get_logger().info('diferenca: {}'.format(math.degrees(diferenca)))
 
-        self.get_logger().info('Parar por 5 segundos.')
-        self.pub_cmd_vel.publish(self.parar)
+        indice_laser = math.floor(math.degrees(diferenca) + 90)
+        # self.get_logger().info('indice_laser: {}'.format(indice_laser))
 
-        self.get_logger().info(
-            'Estou na posição (x:{:.2f}, y:{:.2f}), angulo ({:.2f}).'
-            .format(self.pose.position.x, self.pose.position.y, 180/3.14*self.pose.orientation.z))
-        self.wait(5)
+        valor_laser_objetivo = self.ranges[indice_laser]
+        # self.get_logger().info('valor_laser_objetivo: {}'.format(valor_laser_objetivo))
+
+
+        if(distancia_frente > 1):
+            self.pub_cmd_vel.publish(self.ir_para_frente)
+        elif(distancia_frente > 0.5):
+            if (distancia_direita < distancia_esquerda):
+                self.pub_cmd_vel.publish(self.curva_esquerda)
+            else:
+                self.pub_cmd_vel.publish(self.curva_direita)
+        else:
+            if (distancia_direita < distancia_esquerda):
+                self.pub_cmd_vel.publish(self.girar_esquerda)
+            else:
+                self.pub_cmd_vel.publish(self.girar_direita)
+
+
 
 # Não precisa modificar nada a partir dessa linha
 def main(args=None):

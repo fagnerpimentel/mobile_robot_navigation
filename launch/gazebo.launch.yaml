@@ -7,6 +7,8 @@ launch:
 - executable:
     cmd: "gazebo --verbose $(find-pkg-share mobile_robot_navigation)/resource/worlds/$(var world).world"
     env:
+        - name: ROS_LOCALHOST_ONLY
+          value: "true"
         - name: GAZEBO_MODEL_PATH
           value: "$(find-pkg-share mobile_robot_navigation)/resource/models"
 

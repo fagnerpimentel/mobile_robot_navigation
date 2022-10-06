@@ -50,48 +50,26 @@ class RobotControl(R2D2):
     # Essa função é chamada apenas uma vez quando o seu nó é executado.
     # Modifique essafunção para inicializar a variáveis que você vai precisar para controlar o seu robô. 
     def navigation_start(self):
-        self.ir_para_frente = Twist(linear=Vector3(x= 1.0,y=0.0,z=0.0),angular=Vector3(x=0.0,y=0.0,z= 0.0))
-        self.ir_para_tras   = Twist(linear=Vector3(x=-1.0,y=0.0,z=0.0),angular=Vector3(x=0.0,y=0.0,z= 0.0))
+        self.ir_para_frente = Twist(linear=Vector3(x= 0.5,y=0.0,z=0.0),angular=Vector3(x=0.0,y=0.0,z= 0.0))
+        self.ir_para_tras   = Twist(linear=Vector3(x=-0.5,y=0.0,z=0.0),angular=Vector3(x=0.0,y=0.0,z= 0.0))
         self.girar_direita  = Twist(linear=Vector3(x= 0.0,y=0.0,z=0.0),angular=Vector3(x=0.0,y=0.0,z=-0.5))
         self.girar_esquerda = Twist(linear=Vector3(x= 0.0,y=0.0,z=0.0),angular=Vector3(x=0.0,y=0.0,z= 0.5))
         self.parar          = Twist(linear=Vector3(x= 0.0,y=0.0,z=0.0),angular=Vector3(x=0.0,y=0.0,z= 0.0))
 
-        self.curva_direita  = Twist(linear=Vector3(x= 0.5,y=0.0,z=0.0),angular=Vector3(x=0.0,y=0.0,z=-0.5))
-        self.curva_esquerda = Twist(linear=Vector3(x= 0.0,y=0.0,z=0.0),angular=Vector3(x=0.0,y=0.0,z= 0.5))
-
-        self.objetivo_x = 19
-        self.objetivo_y = 19
-
+        self.curva_direita  = Twist(linear=Vector3(x= 0.1,y=0.0,z=0.0),angular=Vector3(x=0.0,y=0.0,z=-0.5))
+        self.curva_esquerda = Twist(linear=Vector3(x= 0.1,y=0.0,z=0.0),angular=Vector3(x=0.0,y=0.0,z= 0.5))
 
     # Essa função é chamada a cada passo de execução do seu nó.
     # Modifiqe essa função para executar a programação de controle do seu robô
     def navigation_update(self):
-        # laser = self.get_laser()
 
         distancia_direita           = min((self.laser[  0: 80])) # -90 a -10 graus 
         distancia_frente            = min((self.laser[ 80:100])) # -10 a  10 graus
         distancia_esquerda          = min((self.laser[100:180])) #  10 a  90 graus 
 
-        _, _, robo_angulo = tf_transformations.euler_from_quaternion(
-            [self.pose.orientation.x,
-            self.pose.orientation.y,
-            self.pose.orientation.z,
-            self.pose.orientation.w])        
-        objetivo_angulo = math.atan2(self.objetivo_x,self.objetivo_y)
-
-        diferenca = objetivo_angulo - robo_angulo
-        # self.get_logger().info('diferenca: {}'.format(math.degrees(diferenca)))
-
-        indice_laser = math.floor(math.degrees(diferenca) + 90)
-        # self.get_logger().info('indice_laser: {}'.format(indice_laser))
-
-        valor_laser_objetivo = self.ranges[indice_laser]
-        # self.get_logger().info('valor_laser_objetivo: {}'.format(valor_laser_objetivo))
-
-
-        if(distancia_frente > 1):
+        if(distancia_frente > 1.5):
             self.pub_cmd_vel.publish(self.ir_para_frente)
-        elif(distancia_frente > 0.5):
+        elif(distancia_frente > 0.75):
             if (distancia_direita < distancia_esquerda):
                 self.pub_cmd_vel.publish(self.curva_esquerda)
             else:
@@ -101,7 +79,6 @@ class RobotControl(R2D2):
                 self.pub_cmd_vel.publish(self.girar_esquerda)
             else:
                 self.pub_cmd_vel.publish(self.girar_direita)
-
 
 
 # Não precisa modificar nada a partir dessa linha

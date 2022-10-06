@@ -1,14 +1,38 @@
 launch:
 
-- arg:
-    name: "world"
-    default: "r2d2"
+    # argument list
+    - arg:
+        name: "world"
+        default: "r2d2"
 
-- executable:
-    cmd: "gazebo --verbose $(find-pkg-share mobile_robot_navigation)/resource/worlds/$(var world).world"
-    env:
-        - name: ROS_LOCALHOST_ONLY
-          value: "true"
-        - name: GAZEBO_MODEL_PATH
-          value: "$(find-pkg-share mobile_robot_navigation)/resource/models"
+    # gazebo server
+    - executable:
+        cmd: "gzserver --verbose -s libgazebo_ros_init.so -s libgazebo_ros_factory.so -s libgazebo_ros_force_system.so $(find-pkg-share mobile_robot_navigation)/resource/worlds/$(var world).world"
+        env:
+            - name: GAZEBO_MODEL_PATH
+              value: "GAZEBO_MODEL_PATH:$(find-pkg-share mobile_robot_navigation)/resource/models"
+            - name: ROS_LOCALHOST_ONLY
+              value: "true"
 
+    # gazebo client
+    - executable:
+        cmd: "gzclient"
+
+    # load robot
+    - include:
+        file: "$(find-pkg-share myfirstrobot_description)/launch/load_robot.launch.yaml"
+        arg:
+            - {name: "x",   value: "-9"}
+            - {name: "y",   value: "-9"}
+            - {name: "yaw", value: "0.785398"}
+
+    # # mapping
+    # - include:
+    #     file: "$(find-pkg-share slam_toolbox)/launch/online_async_launch.py"
+
+    # # rviz
+    # - node:
+    #     name: "rviz2"
+    #     pkg:  "rviz2"
+    #     exec: "rviz2"
+    #     args: "-d $(find-pkg-share mobile_robot_navigation)/resource/rviz/mapping.rviz"

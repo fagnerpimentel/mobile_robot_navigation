@@ -7,20 +7,20 @@ from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist
 
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy
-qos_profile = QoSProfile(depth=10, reliability = QoSReliabilityPolicy.BEST_EFFORT)
 
 class R2D2(Node):
 
     def __init__(self):
         super().__init__('R2D2')
-        
-        self.ranges = None
-        self.create_subscription(LaserScan, '/r2d2/laserscan', self.listener_callback_laser, qos_profile)
+        qos_profile = QoSProfile(depth=10, reliability = QoSReliabilityPolicy.BEST_EFFORT)
+
+        self.laser = None
+        self.create_subscription(LaserScan, '/scan', self.listener_callback_laser, qos_profile)
 
         self.pose = None
-        self.create_subscription(Odometry, '/r2d2/odom', self.listener_callback_odom, qos_profile)
+        self.create_subscription(Odometry, '/odom', self.listener_callback_odom, qos_profile)
 
-        self.pub_cmd_vel = self.create_publisher(Twist, '/r2d2/cmd_vel', 10)
+        self.pub_cmd_vel = self.create_publisher(Twist, '/cmd_vel', 10)
 
     def wait(self, max_seconds):
         start = time.time()

@@ -10,10 +10,10 @@
       <uri>model://sun</uri>
     </include>
 
-    <include>
+    <!-- <include>
       <uri>model://r2d2</uri>
       <pose>0 0 0 0 -0 0</pose>
-    </include>
+    </include> -->
 
   </world>
 </sdf>

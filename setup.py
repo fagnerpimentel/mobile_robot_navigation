@@ -10,6 +10,8 @@ setup(
         ('share/ament_index/resource_index/packages',['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         ('share/' + package_name, ['launch/gazebo.launch.yaml']),
+        ('share/' + package_name + '/resource/', ['resource/r2d2.urdf']),
+        ('share/' + package_name + '/resource/rviz/', ['resource/rviz/mapping.rviz']),
         ('share/' + package_name + '/resource/models/box/', ['resource/models/box/model.config']),
         ('share/' + package_name + '/resource/models/box/', ['resource/models/box/model.sdf']),
         ('share/' + package_name + '/resource/models/r2d2/', ['resource/models/r2d2/model.config']),
@@ -20,7 +22,8 @@ setup(
         ('share/' + package_name + '/resource/models/wood_square/', ['resource/models/wood_square/model.sdf']),
         ('share/' + package_name + '/resource/worlds/', ['resource/worlds/r2d2.world']),
         ('share/' + package_name + '/resource/worlds/', ['resource/worlds/r2d2_follow_wall.world']),
-        ('share/' + package_name + '/resource/worlds/', ['resource/worlds/r2d2_obstacle_avoidance.world'])
+        ('share/' + package_name + '/resource/worlds/', ['resource/worlds/r2d2_obstacle_avoidance.world']),
+        ('share/' + package_name + '/resource/worlds/', ['resource/worlds/r2d2_obstacles_fixed.world'])
     ],
     install_requires=['setuptools'],
     zip_safe=True,

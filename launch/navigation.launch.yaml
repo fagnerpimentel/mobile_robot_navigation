@@ -38,7 +38,7 @@ launch:
         name: "rviz2"
         pkg:  "rviz2"
         exec: "rviz2"
-        args: "-d $(find-pkg-share mobile_robot_navigation)/resource/rviz/mapping.rviz"
+        args: "-d $(find-pkg-share mobile_robot_navigation)/resource/rviz/navigation.rviz"
 
     # start navigation
     - include: 
